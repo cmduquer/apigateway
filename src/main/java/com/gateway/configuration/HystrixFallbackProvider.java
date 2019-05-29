@@ -3,17 +3,21 @@ package com.gateway.configuration;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 import org.springframework.cloud.netflix.zuul.filters.route.FallbackProvider;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.stereotype.Component;
 
 import com.netflix.hystrix.exception.HystrixTimeoutException;
 
-@Configuration
+import lombok.extern.slf4j.Slf4j;
+
+@Component
+@Slf4j
 public class HystrixFallbackProvider implements FallbackProvider{
 
 	@Override
@@ -23,6 +27,8 @@ public class HystrixFallbackProvider implements FallbackProvider{
 
 	@Override
 	public ClientHttpResponse fallbackResponse(String route, Throwable cause) {
+		log.warn(String.format("route:%s,exceptionType:%s,stackTrace:%s", route, cause.getClass().getName(), Arrays.toString(cause.getStackTrace())));
+        
 		if (cause instanceof HystrixTimeoutException) {
             return response(HttpStatus.GATEWAY_TIMEOUT);
         } else {
